@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>爱心魔法阵</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 主爱心容器 */
+        .heart-container {
+            position: relative;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        /* 主爱心 */
+        .main-heart {
+            font-size: 120px;
+            animation: heartbeat 1.5s ease-in-out infinite;
+            transition: transform 0.3s ease;
+            filter: drop-shadow(0 5px 25px rgba(255, 20, 147, 0.4));
+            position: relative;
+        }
+
+        .main-heart:active {
+            transform: scale(0.85);
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.4); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.4); }
+            70% { transform: scale(1); }
+        }
+
+        /* 爱心内部旋转粒子 */
+        .inner-particle {
+            position: absolute;
+            font-size: 20px;
+            pointer-events: none;
+            animation: rotateAround 3s linear infinite;
+        }
+
+        @keyframes rotateAround {
+            0% { transform: rotate(0deg) translateX(40px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(40px) rotate(-360deg); }
+        }
+
+        /* 小人样式 */
+        .character {
+            position: absolute;
+            z-index: 8;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .character-left {
+            right: 180px;
+            animation-delay: 0s;
+        }
+
+        .character-right {
+            left: 180px;
+            animation-delay: 1s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 小人身体结构 */
+        .person {
+            width: 40px;
+            height: 60px;
+            position: relative;
+        }
+
+        .head {
+            width: 24px;
+            height: 24px;
+            background: #ffdbac;
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .head::before, .head::after {
+            content: '👁️';
+            position: absolute;
+            font-size: 8px;
+            top: 8px;
+        }
+
+        .head::before { left: 4px; }
+        .head::after { right: 4px; }
+
+        .body {
+            width: 32px;
+            height: 28px;
+            background: #ff6b6b;
+            border-radius: 15px 15px 5px 5px;
+            margin: 4px auto 0;
+            position: relative;
+        }
+
+        .body::before,
+        .body::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 18px;
+            background: #ffdbac;
+            border-radius: 4px;
+            top: 12px;
+        }
+
+        .body::before { left: -6px; transform: rotate(-20deg); }
+        .body::after { right: -6px; transform: rotate(20deg); }
+
+        /* 粒子效果 */
+        .particle {
+            position: absolute;
+            font-size: 24px;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 5;
+        }
+
+        @keyframes particleFly {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0.2) rotate(360deg);
+            }
+        }
+
+        /* 提示文字 */
+        .hint {
+            position: absolute;
+            bottom: 60px;
+            color: white;
+            font-size: 14px;
+            opacity: 0.8;
+            animation: fadeInOut 3s ease-in-out infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧小人 -->
+    <div class="character character-left">
+        <div class="person">
+            <div class="head"></div>
+            <div class="body"></div>
+        </div>
+    </div>
+
+    <!-- 右侧小人 -->
+    <div class="character character-right">
+        <div class="person">
+            <div class="head"></div>
+            <div class="body"></div>
+        </div>
+    </div>
+
+    <!-- 主爱心容器 -->
+    <div class="heart-container" onclick="createParticles(event)">
+        <div class="main-heart">❤️</div>
+    </div>
+
+    <!-- 提示文字 -->
+    <div class="hint">点击爱心释放魔法 ✨</div>
+
+    <script>
+        // 创建内部旋转粒子
+        function createInnerParticles() {
+            const heartContainer = document.querySelector('.heart-container');
+            const particleCount = 6;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'inner-particle';
+                particle.textContent = '✨';
+                particle.style.left = '50%';
+                particle.style.top = '50%';
+                particle.style.marginLeft = '-10px';
+                particle.style.marginTop = '-10px';
+                particle.style.animationDelay = (i * 0.5) + 's';
+                heartContainer.appendChild(particle);
+            }
+        }
+
+        // 点击创建爆发粒子
+        function createParticles(event) {
+            const heartContainer = event.currentTarget;
+            const rect = heartContainer.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const particleCount = 32;
+            const emojis = ['❤️', '💖', '💕', '💗', '💝', '💞', '💓', '💘', '✨', '⭐', '🌟'];
+            
+            for (let i = 0; i < particleCount; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    
+                    const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.3;
+                    const distance = 100 + Math.random() * 200;
+                    const tx = Math.cos(angle) * distance;
+                    const ty = Math.sin(angle) * distance;
+                    
+                    particle.style.setProperty('--tx', tx + 'px');
+                    particle.style.setProperty('--ty', ty + 'px');
+                    particle.style.left = centerX + 'px';
+                    particle.style.top = centerY + 'px';
+                    
+                    const duration = 1.5 + Math.random() * 1;
+                    particle.style.animation = `particleFly ${duration}s ease-out forwards`;
+                    particle.style.animationDelay = Math.random() * 0.15 + 's';
+                    
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, (duration + 0.2) * 1000);
+                }, i * 20);
+            }
+
+            // 小人欢呼动画
+            animateCharacters();
+        }
+
+        // 小人欢呼
+        function animateCharacters() {
+            const characters = document.querySelectorAll('.character');
+            characters.forEach((char, index) => {
+                setTimeout(() => {
+                    char.style.animation = 'bounce 0.5s ease-in-out 3';
+                }, index * 200);
+                
+                // 恢复原动画
+                setTimeout(() => {
+                    char.style.animation = 'bounce 2s ease-in-out infinite';
+                }, 2000);
+            });
+        }
+
+        // 初始化
+        createInnerParticles();
+
+        // 自动创建环境粒子
+        setInterval(() => {
+            if (Math.random() < 0.2) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.textContent = '✨';
+                particle.style.left = Math.random() * window.innerWidth + 'px';
+                particle.style.top = window.innerHeight + 'px';
+                particle.style.fontSize = '12px';
+                
+                const randomX = (Math.random() - 0.5) * 100;
+                const randomY = -50 - Math.random() * 100;
+                particle.style.setProperty('--tx', randomX + 'px');
+                particle.style.setProperty('--ty', randomY + 'px');
+                
+                particle.style.animation = 'particleFly 3s ease-out forwards';
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 3000);
+            }
+        }, 1500);
+    </script>
+</body>
+</html>
